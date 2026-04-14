@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jadwal Harian Amelia</title>
+    
+    <!-- Google Fonts: Poppins untuk tampilan aesthetic -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons untuk icon yang minimalis dan lucu -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Tailwind CSS untuk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Konfigurasi Tailwind Custom -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        soft: {
+                            pink: '#FFE5EC',
+                            peach: '#FFDAB9',
+                            green: '#E8F3D6',
+                            blue: '#E0F4FF',
+                            purple: '#E5D9F2',
+                            text: '#4A4A4A'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            /* Background gradient aesthetic */
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            background-image: radial-gradient(at 40% 20%, #ffe5ec 0px, transparent 50%),
+                              radial-gradient(at 80% 0%, #e5d9f2 0px, transparent 50%),
+                              radial-gradient(at 0% 50%, #e0f4ff 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #4A4A4A;
+        }
+
+        /* Glassmorphism effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #FFB6C1;
+            border-radius: 20px;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .task-checkbox:checked + div {
+            text-decoration: line-through;
+            color: #a0aec0;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-8">
+
+    <!-- Main App Container -->
+    <main class="glass-card w-full max-w-md rounded-[2.5rem] overflow-hidden flex flex-col h-[85vh] sm:h-[800px] relative">
+        
+        <!-- Header Section -->
+        <header class="p-8 pb-4">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Halo, Amelia! ✨</h1>
+                    <p id="current-date" class="text-sm text-gray-500 font-medium mt-1">Memuat tanggal...</p>
+                </div>
+                <div class="w-14 h-14 rounded-full bg-soft-pink flex items-center justify-center shadow-sm border-2 border-white">
+                    <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Amelia&backgroundColor=transparent" alt="Avatar Amelia" class="w-10 h-10 rounded-full">
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex bg-white/50 rounded-2xl p-1 shadow-sm border border-white/60">
+                <button onclick="switchTab('rutinitas')" id="tab-rutinitas" class="flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-300 bg-white shadow-sm text-pink-500">
+                    <i class="ph ph-calendar-check mr-1"></i> Rutinitas
+                </button>
+                <button onclick="switchTab('hobi')" id="tab-hobi" class="flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-300 text-gray-500 hover:text-purple-500">
+                    <i class="ph ph-palette mr-1"></i> Hobi & Minat
+                </button>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar px-8 pb-8 relative">
+            
+            <!-- Rutinitas View -->
+            <div id="view-rutinitas" class="fade-in space-y-4">
+                <!-- Items will be injected here by JS -->
+            </div>
+
+            <!-- Hobi View (Hidden by default) -->
+            <div id="view-hobi" class="hidden fade-in space-y-4">
+                <!-- Items will be injected here by JS -->
+            </div>
+
+        </div>
+
+        <!-- Floating Add Button (Aesthetic purpose) -->
+        <button class="absolute bottom-6 right-6 w-14 h-14 bg-gradient-to-tr from-pink-300 to-purple-300 rounded-full shadow-lg flex items-center justify-center text-white hover:scale-110 transition-transform duration-300 border-2 border-white">
+            <i class="ph ph-plus text-2xl font-bold"></i>
+        </button>
+
+    </main>
+
+    <script>
+        // --- Data ---
+        const rutinitas = [
+            { id: 1, time: '06:00', title: 'Morning Skincare & Meditasi', icon: 'ph-flower-lotus', color: 'text-pink-500', bg: 'bg-soft-pink' },
+            { id: 2, time: '07:30', title: 'Sarapan Aesthetic', icon: 'ph-coffee', color: 'text-orange-400', bg: 'bg-soft-peach' },
+            { id: 3, time: '09:00', title: 'Fokus Kerja / Belajar', icon: 'ph-laptop', color: 'text-blue-400', bg: 'bg-soft-blue' },
+            { id: 4, time: '13:00', title: 'Makan Siang & Istirahat', icon: 'ph-bowl-food', color: 'text-green-500', bg: 'bg-soft-green' },
+            { id: 5, time: '16:00', title: 'Olahraga Ringan', icon: 'ph-barbell', color: 'text-pink-500', bg: 'bg-soft-pink' },
+            { id: 6, time: '19:00', title: 'Makan Malam & Relax', icon: 'ph-armchair', color: 'text-orange-400', bg: 'bg-soft-peach' },
+            { id: 7, time: '21:00', title: 'Journaling & Me Time', icon: 'ph-book-open-text', color: 'text-purple-500', bg: 'bg-soft-purple' },
+            { id: 8, time: '22:30', title: 'Beauty Sleep', icon: 'ph-moon-stars', color: 'text-blue-500', bg: 'bg-soft-blue' }
+        ];
+
+        const hobi = [
+            { title: 'Membaca Novel', desc: 'Minimal 1 bab sehari untuk imajinasi', icon: 'ph-books', color: 'text-purple-500', bg: 'bg-soft-purple' },
+            { title: 'Merawat Tanaman', desc: 'Menyiram Monstera & Kaktus mini', icon: 'ph-potted-plant', color: 'text-green-500', bg: 'bg-soft-green' },
+            { title: 'Baking', desc: 'Mencoba resep kue & dessert baru', icon: 'ph-cooking-pot', color: 'text-orange-400', bg: 'bg-soft-peach' },
+            { title: 'Fotografi Analog', desc: 'Hunting foto estetik di akhir pekan', icon: 'ph-camera', color: 'text-pink-500', bg: 'bg-soft-pink' },
+            { title: 'Mendengarkan Musik', desc: 'Membuat playlist sesuai mood', icon: 'ph-headphones', color: 'text-blue-500', bg: 'bg-soft-blue' }
+        ];
+
+        // --- Functions ---
+        
+        // Setup Date
+        function updateDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date();
+            document.getElementById('current-date').textContent = today.toLocaleDateString('id-ID', options);
+        }
+
+        // Render Rutinitas
+        function renderRutinitas() {
+            const container = document.getElementById('view-rutinitas');
+            container.innerHTML = rutinitas.map(item => `
+                <label class="flex items-center p-4 bg-white/60 rounded-2xl shadow-sm border border-white/50 cursor-pointer hover:bg-white/80 transition-colors duration-200 group">
+                    <input type="checkbox" class="task-checkbox hidden">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center ${item.bg} ${item.color} text-2xl mr-4 shrink-0 transition-transform group-hover:scale-110">
+                        <i class="ph ${item.icon}"></i>
+                    </div>
+                    <div class="flex-1 transition-all duration-300">
+                        <h3 class="font-semibold text-gray-800">${item.title}</h3>
+                        <p class="text-sm text-gray-500"><i class="ph ph-clock mr-1"></i>${item.time}</p>
+                    </div>
+                    <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center ml-2 text-transparent transition-colors duration-300 group-hover:border-pink-300 checkbox-indicator">
+                        <i class="ph ph-check text-sm"></i>
+                    </div>
+                </label>
+            `).join('');
+
+            // Add custom checkbox logic for aesthetic styling
+            const labels = container.querySelectorAll('label');
+            labels.forEach(label => {
+                const checkbox = label.querySelector('.task-checkbox');
+                const indicator = label.querySelector('.checkbox-indicator');
+                
+                checkbox.addEventListener('change', (e) => {
+                    if(e.target.checked) {
+                        indicator.classList.remove('border-gray-300', 'text-transparent');
+                        indicator.classList.add('bg-pink-400', 'border-pink-400', 'text-white');
+                    } else {
+                        indicator.classList.add('border-gray-300', 'text-transparent');
+                        indicator.classList.remove('bg-pink-400', 'border-pink-400', 'text-white');
+                    }
+                });
+            });
+        }
+
+        // Render Hobi
+        function renderHobi() {
+            const container = document.getElementById('view-hobi');
+            container.innerHTML = hobi.map(item => `
+                <div class="flex flex-col p-5 bg-white/60 rounded-2xl shadow-sm border border-white/50 hover:shadow-md transition-shadow duration-300 relative overflow-hidden group">
+                    <!-- Decorative background circle -->
+                    <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full ${item.bg} opacity-50 transition-transform duration-500 group-hover:scale-150"></div>
+                    
+                    <div class="relative z-10 flex items-start">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center ${item.bg} ${item.color} text-2xl mr-4 shrink-0 shadow-sm border border-white">
+                            <i class="ph ${item.icon}"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-lg">${item.title}</h3>
+                            <p class="text-sm text-gray-600 mt-1">${item.desc}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Tab Switcher Logic
+        function switchTab(tabName) {
+            const viewRutinitas = document.getElementById('view-rutinitas');
+            const viewHobi = document.getElementById('view-hobi');
+            const btnRutinitas = document.getElementById('tab-rutinitas');
+            const btnHobi = document.getElementById('tab-hobi');
+
+            if (tabName === 'rutinitas') {
+                viewRutinitas.classList.remove('hidden');
+                viewHobi.classList.add('hidden');
+                
+                // Style active button
+                btnRutinitas.classList.add('bg-white', 'shadow-sm', 'text-pink-500');
+                btnRutinitas.classList.remove('text-gray-500');
+                
+                // Style inactive button
+                btnHobi.classList.remove('bg-white', 'shadow-sm', 'text-purple-500');
+                btnHobi.classList.add('text-gray-500');
+            } else {
+                viewRutinitas.classList.add('hidden');
+                viewHobi.classList.remove('hidden');
+                
+                // Style active button
+                btnHobi.classList.add('bg-white', 'shadow-sm', 'text-purple-500');
+                btnHobi.classList.remove('text-gray-500');
+                
+                // Style inactive button
+                btnRutinitas.classList.remove('bg-white', 'shadow-sm', 'text-pink-500');
+                btnRutinitas.classList.add('text-gray-500');
+            }
+        }
+
+        // Initialize App
+        window.onload = () => {
+            updateDate();
+            renderRutinitas();
+            renderHobi();
+        };
+
+    </script>
+</body>
+</html>
